@@ -26,20 +26,24 @@ def save_blog_posts(posts):
         json.dump(posts, file, indent=4)
 
 
-def fetch_post_by_id(post_id):
-    """Retrieve a blog post by its ID."""
-    blog_posts = load_blog_posts()
-    for post in blog_posts:
-        if post["id"] == post_id:
-            return post
-    return None
-
-
 @app.route("/")
 def index():
     """Render the homepage with blog posts loaded from the JSON file."""
     blog_posts = load_blog_posts()
     return render_template("index.html", posts=blog_posts)
+
+
+@app.route("/like/<int:post_id>")
+def like(post_id):
+    """Increment likes for a blog post."""
+    blog_posts = load_blog_posts()
+    for post in blog_posts:
+        if post["id"] == post_id:
+            post["likes"] = post.get("likes", 0) + 1  # Increment likes
+            break
+
+    save_blog_posts(blog_posts)
+    return redirect(url_for("index"))
 
 
 @app.route("/add", methods=["GET", "POST"])
@@ -53,7 +57,7 @@ def add():
         if author and title and content:  # Ensure all fields are filled
             blog_posts = load_blog_posts()
             new_id = max([post["id"] for post in blog_posts], default=0) + 1  # Generate a unique ID
-            new_post = {"id": new_id, "author": author, "title": title, "content": content}
+            new_post = {"id": new_id, "author": author, "title": title, "content": content, "likes": 0}
             blog_posts.append(new_post)
             save_blog_posts(blog_posts)
 
