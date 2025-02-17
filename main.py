@@ -53,6 +53,16 @@ def add():
     return render_template("add.html")
 
 
+@app.route("/delete/<int:post_id>")
+def delete(post_id):
+    """Delete a blog post by ID and redirect to home page."""
+    blog_posts = load_blog_posts()
+    blog_posts = [post for post in blog_posts if post["id"] != post_id]  # Remove post with matching ID
+    save_blog_posts(blog_posts)
+    
+    return redirect(url_for("index"))
+
+
 @app.route("/api/posts")
 def api_posts():
     """Return blog posts as JSON (optional API endpoint for debugging)."""
